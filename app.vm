@@ -1,0 +1,471 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+#parse ("macros.vm")
+
+package $packageName;
+import javafx.application.*;
+import javafx.event.*;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.*;
+import org.controlsfx.control.*;
+import javafx.beans.property.*;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.*;
+import javafx.scene.control.cell.*;
+import javax.imageio.*;
+import javafx.embed.swing.*;
+import javafx.print.*;
+import javafx.scene.*;
+import javafx.scene.transform.*;
+
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+
+import org.apache.commons.io.*;
+import org.controlsfx.control.*;
+
+import java.util.logging.*;
+
+public class App extends Application
+{
+
+	private StatusBar statusBar;
+	private BorderPane borderPane;
+	private TabPane tabPane;
+	private Stage primaryStage;
+	private Scene scene;
+	private ScrollPane scrollPane;
+	private SplitPane splitPane;
+	private TextArea previewPane;
+	private SimpleStringProperty appTitle;
+	private SimpleStringProperty previewText;
+    private File file;
+    private Logger log;
+
+
+    #set ( $settings = $propertiesMap.get("setting") )
+    #set ( $query = $propertiesMap.get("query") )
+    #set ( $data = $propertiesMap.get("data") )
+
+    @Override
+    public void start(Stage primaryStage)
+     {
+        log = ${projectNameTitle}Logger.getInstance(true);
+		appTitle = new SimpleStringProperty("untitled");
+		Menu menuFile = new Menu("File");
+		MenuItem menuFileItemNew = new MenuItem("New");
+		menuFileItemNew.setOnAction(actionEvent ->
+		{
+			onFileNew(actionEvent);
+		});
+		MenuItem menuFileItemSave = new MenuItem("Save");
+		menuFileItemSave.setOnAction(actionEvent ->
+		{
+			onFileSave(actionEvent);
+		});
+		MenuItem menuFileItemOpen = new MenuItem("Open...");
+		menuFileItemOpen.setOnAction(actionEvent ->
+		{
+			onFileOpen(actionEvent);
+		});
+		MenuItem menuFileItemSaveAs = new MenuItem("Save As...");
+		menuFileItemSaveAs.setOnAction(actionEvent ->
+		{
+			onFileSaveAs(actionEvent);
+		});
+		MenuItem menuFileItemSnapshot = new MenuItem("Snapshot...");
+		menuFileItemSnapshot.setOnAction(actionEvent ->
+		{
+			onFileSnapshot(actionEvent);
+		});
+		MenuItem menuFileItemPrint = new MenuItem("Print...");
+		menuFileItemSnapshot.setOnAction(actionEvent ->
+		{
+			onFilePrint(actionEvent);
+		});
+
+		MenuItem menuFileItemExit = new MenuItem("Exit");
+		menuFileItemExit.setOnAction(actionEvent ->
+		{
+
+			Tab tab = tabPane.getSelectionModel().getSelectedItem();
+			${projectNameTitle}Document doc = ( ${projectNameTitle}Document ) tab.getUserData();
+
+			if (doc.getDirtyValue() == true)
+			{
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Save File ?");
+				alert.setHeaderText("Save File ?");
+				alert.setContentText("Save File?");
+
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.get() == ButtonType.OK)
+				{
+					onFileSave(null);
+				}
+				else
+				{
+					Alert alert2 = new Alert(AlertType.INFORMATION);
+					alert2.setTitle("File will not be saved");
+					alert2.setHeaderText("File will not be saved");
+					alert2.setContentText("File will not be saved");
+					alert2.showAndWait();
+				}
+			}
+			Platform.exit();
+		});
+
+		menuFile.getItems().addAll(menuFileItemNew, menuFileItemOpen, menuFileItemSave, menuFileItemSaveAs,
+		        new SeparatorMenuItem(), menuFileItemSnapshot, menuFileItemPrint, new SeparatorMenuItem(), menuFileItemExit);
+
+		Menu menuHelp = new Menu("Help");
+		MenuItem menuHelpItemAbout = new MenuItem("About...");
+		menuHelpItemAbout.setOnAction(actionEvent ->
+		{
+			onHelpAbout(actionEvent);
+		});
+		menuHelp.getItems().addAll(menuHelpItemAbout);
+
+ 		MenuBar menuBar = new MenuBar();
+		menuBar.getMenus().addAll(menuFile, menuHelp);
+
+		Image imageSave = new Image(getClass().getResourceAsStream("/img/page_save.png"));
+		Button tbSave = new Button("Save", new ImageView(imageSave));
+		tbSave.setOnAction(actionEvent ->
+		{
+			onFileSave(actionEvent);
+		});
+
+		Image imageOpen = new Image(getClass().getResourceAsStream("/img/page_edit.png"));
+		Button tbOpen = new Button("Open", new ImageView(imageOpen));
+		tbOpen.setOnAction(actionEvent ->
+		{
+			onFileOpen(actionEvent);
+		});
+
+		Image imageSaveAs = new Image(getClass().getResourceAsStream("/img/page_save.png"));
+		Button tbSaveAs = new Button("Save As", new ImageView(imageSaveAs));
+		tbSaveAs.setOnAction(actionEvent ->
+		{
+			onFileSaveAs(actionEvent);
+		});
+        ToolBar toolBar = new ToolBar(tbOpen, tbSave, tbSaveAs);
+
+		VBox vbox = new VBox(8);
+		vbox.getChildren().addAll(menuBar, toolBar);
+		borderPane = new BorderPane();
+		borderPane.setTop(vbox);
+		statusBar = new StatusBar();
+		borderPane.setBottom(statusBar);
+		tabPane = new TabPane ();
+		borderPane.setCenter(tabPane);
+
+		appTitle.setValue("untitled");
+		newTab ("untitled");
+
+		scene = new Scene(borderPane, 2000, 1000);
+		primaryStage.setTitle("untitled");
+		primaryStage.setScene(scene);
+		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/img/transmit.png")));
+		primaryStage.show();
+    }
+
+    	private void onFileNew(ActionEvent event)
+	{
+		appTitle.setValue("untitled");
+		newTab ("untitled");
+	}
+
+    	private void onFileOpen(ActionEvent event)
+	{
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("jas files (*.jas)", "*.jas");
+		fileChooser.setSelectedExtensionFilter(extFilter);
+		File f = fileChooser.showOpenDialog(tabPane.getScene().getWindow());
+		if (f != null)
+		{
+			Tab tab = newTab (f.getPath());
+			${projectNameTitle}Document doc = ( ${projectNameTitle}Document ) tab.getUserData();
+
+			try (FileInputStream fis = new FileInputStream(f); ObjectInputStream ois = new ObjectInputStream(fis))
+			{
+				doc.readDoc(ois);
+				ois.close();
+				file = f;
+				statusBar.setText(file.getPath() + " opened");
+				appTitle.setValue(file.getPath());
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				Notifications.create().title(e.getClass().getName()).text(e.getMessage()).showError();
+			}
+		}
+	}
+
+	private void onFileSave(ActionEvent event)
+	{
+		if (file == null)
+		{
+			onFileSaveAs(event);
+		}
+		else
+		{
+			Tab tab = tabPane.getSelectionModel().getSelectedItem();
+			${projectNameTitle}Document doc = ( ${projectNameTitle}Document ) tab.getUserData();
+			if (doc.getDirtyValue() == true)
+			{
+				try (FileOutputStream fos = new FileOutputStream(file);
+				        ObjectOutputStream oos = new ObjectOutputStream(fos))
+				{
+					doc.writeDoc(oos);
+					oos.close();
+					appTitle.setValue(file.getPath());
+					statusBar.setText(file.getName() + " saved");
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					Notifications.create().title(e.getClass().getName()).text(e.getMessage()).showError();
+				}
+				statusBar.setText(file.getPath() + " saved");
+			}
+		}
+	}
+
+	private void onFileSaveAs(ActionEvent event)
+	{
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("jas files (*.jas)", "*.jas");
+		fileChooser.setSelectedExtensionFilter(extFilter);
+		final File f = fileChooser.showSaveDialog(tabPane.getScene().getWindow());
+		if (f != null)
+		{
+			Tab tab = tabPane.getSelectionModel().getSelectedItem();
+			${projectNameTitle}Document doc = ( ${projectNameTitle}Document ) tab.getUserData();
+			try (FileOutputStream fos = new FileOutputStream(f); ObjectOutputStream oos = new ObjectOutputStream(fos))
+			{
+				doc.writeDoc(oos);
+				oos.close();
+				file = f;
+				appTitle.setValue(file.getPath());
+				statusBar.setText(file.getPath() + " saved");
+			}
+			catch (Exception e)
+			{
+				Notifications.create().title(e.getClass().getName()).text(e.getMessage()).showError();
+			}
+			}
+	}
+
+		private void onFileSnapshot(ActionEvent event)
+	{
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("image files (*.png)", "*.png");
+		fileChooser.setSelectedExtensionFilter(extFilter);
+		final File f = fileChooser.showSaveDialog(tabPane.getScene().getWindow());
+		if (f != null)
+		{
+			try
+			{
+				WritableImage image = new WritableImage((int) scene.getWidth(), (int) scene.getHeight());
+				scene.snapshot(image);
+				ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", f);
+				statusBar.setText(f.getPath() + " saved");
+			}
+			catch (Exception e)
+			{
+				Notifications.create().title(e.getClass().getName()).text(e.getMessage()).showError();
+			}
+		}
+	}
+
+		private void onFilePrint(ActionEvent event)
+	{
+				Tab tab = tabPane.getSelectionModel().getSelectedItem();
+	Node node = tab.getContent ();
+	print(node);
+	}
+
+public void print(final Node node)
+ {
+    Printer printer = Printer.getDefaultPrinter();
+    PageLayout pageLayout = printer.createPageLayout(Paper.NA_LETTER, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
+    double scaleX = pageLayout.getPrintableWidth() / node.getBoundsInParent().getWidth();
+    double scaleY = pageLayout.getPrintableHeight() / node.getBoundsInParent().getHeight();
+    node.getTransforms().add(new Scale(scaleX, scaleY));
+
+    PrinterJob job = PrinterJob.createPrinterJob();
+    if (job != null)
+     {
+        boolean success = job.printPage(node);
+        if (success) {
+            job.endJob();
+        }
+    }
+}
+	private void onHelpAbout(ActionEvent event)
+	{
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("sftp Help About");
+		InputStream is = getClass().getResourceAsStream("/build.properties");
+		try
+		{
+			List<String> lines = IOUtils.readLines(is, Charset.defaultCharset());
+			StringBuilder buffer = new StringBuilder();
+			for (String line : lines)
+			{
+				buffer.append(line);
+				buffer.append('\n');
+			}
+			alert.setContentText(buffer.toString());
+			is.close();
+		}
+		catch (IOException e)
+		{
+			Notifications notifications = Notifications.create();
+			notifications.text(e.getMessage());
+			notifications.showError();
+		}
+		alert.setHeaderText("Platform: " + org.controlsfx.tools.Platform.getCurrent().getPlatformId());
+		alert.showAndWait();
+	}
+
+	public Tab newTab(String title)
+	{
+		${projectNameTitle}Document doc = new  ${projectNameTitle}Document ();
+		Tab result = new Tab (title);
+		result.setUserData(doc);
+
+		GridPane gridPaneSettings = new GridPane ();
+		TitledPane tSettings = new TitledPane("Settings", gridPaneSettings);
+		// settings variables
+	#foreach( $entry in $settings )
+		Label label${entry["field_namet"]} = new Label ("${entry["field_label"]}");
+		TextField field${entry["field_namet"]} = new TextField ("${entry["field_label"]}");
+		field${entry["field_namet"]}.textProperty().bindBidirectional( doc.getSettings().getValue().get${entry["field_namet"]}() );
+		field${entry["field_namet"]}.setTooltip(new Tooltip("${entry["field_description"]}"));
+		addControls(gridPaneSettings,  label${entry["field_namet"]} , field${entry["field_namet"]} );
+    #end
+    //
+   		Image imageConnect = new Image(getClass().getResourceAsStream("/img/server_connect.png"));
+		Button buttonConnect = new Button("Connect", new ImageView(imageConnect));
+		addButton ( gridPaneSettings, buttonConnect );
+		buttonConnect.setOnAction(actionEvent ->
+		{
+			log.info("server connect");
+			${projectNameTitle}Service service = doc.getServiceValue();
+			service.reset();
+		});
+
+		GridPane gridPaneQuery = new GridPane ();
+        TitledPane tQuery = new TitledPane("Query", gridPaneQuery);
+        // query variables
+	#foreach( $entry in $query )
+		Label label${entry["field_namet"]} = new Label ("${entry["field_label"]}");
+		TextField field${entry["field_namet"]} = new TextField ("${entry["field_label"]}");
+		field${entry["field_namet"]}.textProperty().bindBidirectional( doc.getQuery().getValue().get${entry["field_namet"]}() );
+		field${entry["field_namet"]}.setTooltip(new Tooltip("${entry["field_description"]}"));
+		addControls(gridPaneQuery,  label${entry["field_namet"]} , field${entry["field_namet"]} );
+   #end
+   //
+   		Image imageRefresh = new Image(getClass().getResourceAsStream("/img/server_go.png"));
+		Button buttonRefresh = new Button("Refresh", new ImageView(imageRefresh));
+		addButton ( gridPaneQuery, buttonRefresh );
+		buttonConnect.setOnAction(actionEvent ->
+		{
+			log.info("server refresh");
+			${projectNameTitle}Service service = doc.getServiceValue();
+			service.reset();
+			service.start();
+		});
+
+        TableView<${projectNameTitle}Data> tableView = new TableView<${projectNameTitle}Data>();
+		${projectNameTitle}Service service = doc.getServiceValue();
+		tableView.itemsProperty().bind(service.valueProperty());
+        TitledPane tData = new TitledPane("Data", tableView);
+		createColumns(tableView);
+
+
+        Accordion accordion = new Accordion();
+        accordion.getPanes().addAll(tSettings, tQuery, tData);
+		result.setContent(accordion);
+		tabPane.getTabs().add(result);
+
+		statusBar.progressProperty().bind(service.progressProperty());
+
+		return result;
+	}
+
+	public void addControls ( GridPane gridPane, Label label, Control control )
+	{
+	    int row = gridPane.getChildren().size();
+		gridPane.add(label, 0, row);
+		gridPane.add(control, 1, row);
+	}
+
+	public void addButton ( GridPane gridPane, Button button )
+	{
+	    int row = gridPane.getChildren().size();
+		gridPane.add(button, 0, row);
+	}
+    public void createColumns (TableView tableView)
+    {
+    #foreach( $entry in $data )
+
+    	TableColumn<${projectNameTitle}Data, ${entry["field_java_class"]}> ${entry["field_namet"]}Column = new TableColumn<${projectNameTitle}Data, ${entry["field_java_class"]}>("${entry["field_label"]}");
+		${entry["field_namet"]}Column.setCellValueFactory(new PropertyValueFactory<${projectNameTitle}Data, ${entry["field_java_class"]}>("${entry["field_name"]}"));
+		${entry["field_namet"]}Column.setPrefWidth(400);
+
+ /*
+    	${entry["field_name"]}
+    	${entry["field_namet"]}
+    	${entry["field_type"]}
+    	${entry["field_default_value"]}
+    	${entry["field_java_class"]}
+    	${entry["field_property_class"]}
+    	${entry["field_label"]}
+    	${entry["field_required"]}
+    	${entry["field_description"]}
+*/
+    #end
+
+    #set ( $count = 0 )
+    tableView.getColumns().addAll(
+        #foreach( $entry in $data )
+		    #set ( $count = $count + 1 )
+		    	${entry["field_namet"]}Column
+		    #if ( $count != $data.size() )
+		    ,
+		    #end
+        #end
+		        );
+    }
+
+ public static void main(String[] args) {
+        launch(args);
+    }
+    }

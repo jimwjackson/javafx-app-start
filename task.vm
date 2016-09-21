@@ -1,0 +1,89 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+package $packageName;
+import java.util.Collection;
+
+import javafx.collections.*;
+import javafx.concurrent.*;
+import javafx.beans.property.*;
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+import java.util.logging.*;
+
+	#set ( $data = $propertiesMap.get("data") )
+
+public class ${projectNameTitle}Task extends Task<ObservableList<${projectNameTitle}Data>>
+{
+
+	private ${projectNameTitle}Document document;
+	private SimpleListProperty<Object> properties = new SimpleListProperty <Object> ();
+	    private Logger log;
+
+
+	public ${projectNameTitle}Task (${projectNameTitle}Document document)
+	{
+		super();
+		this.document = document;
+       log = ${projectNameTitle}Logger.getInstance(true);
+
+	}
+
+	@Override
+	protected ObservableList<${projectNameTitle}Data> call() throws Exception
+	{
+		ObservableList<${projectNameTitle}Data> result = FXCollections.observableArrayList();
+		result.clear();
+		// use mock data
+		${projectNameTitle}Data data = new ${projectNameTitle}Data ();
+		#foreach( $entry in $data )
+			data.set${entry["field_namet"]}Value(${entry["field_mock_value"]});
+    	#end
+		result.add(data);
+    	updateMessage("Task call complete");
+		updateProgress(100, 100);
+		log.info("task call");
+		return result;
+	}
+
+
+
+	@Override
+	protected void succeeded()
+	{
+		super.succeeded();
+		log.info("task succeeded");
+		updateMessage("complete.");
+	}
+
+	@Override
+	protected void cancelled()
+	{
+		super.cancelled();
+		log.info("task cancelled");
+		updateMessage("Cancelled!");
+	}
+
+	@Override
+	protected void failed()
+	{
+		super.failed();
+		log.info("task failed");
+		updateMessage("Failed!");
+	}
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder ();
+		result.append("Task [ " );
+		result.append(properties);
+		result.append(" ]" );
+		return result.toString();
+	}
+
+}

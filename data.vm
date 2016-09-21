@@ -1,0 +1,126 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+#parse ("macros.vm")
+
+package $packageName;
+
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+
+import javafx.beans.property.*;
+
+public class ${projectNameTitle}Data implements Serializable
+{
+	private static final long serialVersionUID = 1L;
+	private boolean dirty;
+	#set ( $data = $propertiesMap.get("data") )
+	private List<Object> properties = new ArrayList <Object> ();
+
+#properties ( $data )
+
+	public ${projectNameTitle}Data()
+	{
+#propertiesNew ( $data )
+	#foreach( $entry in $data )
+		${entry["field_name"]}.addListener ( ( observable, oldValue, newValue ) ->
+		{
+			dirty=true;
+		});
+    #end
+	#propertiesList ( $doc )
+
+	}
+
+	public void clear()
+	{
+#propertiesClear ( $data )
+	}
+
+	public void readDoc(ObjectInputStream stream)
+	{
+		try
+		{
+	#foreach( $entry in $data )
+			$entry["field_java_class"] ${entry["field_name"]} = ($entry["field_java_class"]) stream.readObject();
+			this.${entry["field_name"]}.setValue ( ${entry["field_name"]} );
+    #end
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void writeDoc(ObjectOutputStream stream)
+	{
+		try
+		{
+	#foreach( $entry in $data )
+			stream.writeObject( ${entry["field_name"]}.getValue() );
+    #end
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
+	#foreach( $entry in $data )
+		#propertyGetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $data )
+		#propertySetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $data )
+		#propertyValueGetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $data )
+		#propertyValueSetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	public boolean getDirty()
+	{
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty)
+	{
+		this.dirty = dirty;
+	}
+
+	public Boolean getDirtyValue()
+	{
+		return dirty;
+	}
+
+	public List<Object> getProperties ()
+	{
+		return properties;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder ();
+		result.append("Data [ " );
+	#foreach( $entry in $data )
+		result.append("${entry["field_name"]} = " + ${entry["field_name"]} + ", ");
+	#end
+		result.append("dirty = " + dirty );
+		result.append(" ]" );
+		return result.toString();
+	}
+
+}

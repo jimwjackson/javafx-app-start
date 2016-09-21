@@ -1,0 +1,152 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+#parse ("macros.vm")
+
+package $packageName;
+
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+
+import javafx.beans.property.*;
+
+public class ${projectNameTitle}Document implements Serializable
+{
+	private static final long serialVersionUID = 1L;
+	private boolean dirty;
+	private List<Object> properties = new ArrayList <Object> ();
+	#set ( $doc = $propertiesMap.get("doc") )
+
+#properties ( $doc )
+
+	public ${projectNameTitle}Document()
+	{
+#propertiesNew ( $doc )
+	#foreach( $entry in $doc )
+		${entry["field_name"]}.addListener ( ( observable, oldValue, newValue ) ->
+		{
+			dirty=true;
+		});
+    #end
+	#propertiesList ( $doc )
+
+	}
+
+	public void clear()
+	{
+#propertiesClear ( $doc )
+	}
+
+	public void readDoc(ObjectInputStream stream)
+	{
+		try
+		{
+	#foreach ( $entry in $doc )
+#set ( $class = ${entry["field_property_class"]} )
+#set ( $name = ${entry["field_name"]} )
+// $name $class
+			#if ( $class.matches(".+Service>") )
+			// skipping $class
+			#elseif ( $class.matches("<([_A-Za-z0-9]+)>") )
+				${name}.getValue().readDoc ( stream ) ;
+		#else
+			$entry["field_java_class"] ${entry["field_name"]} = ($entry["field_java_class"]) stream.readObject();
+			this.${entry["field_name"]}.setValue ( ${entry["field_name"]} );
+		#end
+    #end
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void writeDoc(ObjectOutputStream stream)
+	{
+		try
+		{
+	#foreach( $entry in $doc )
+#set ( $class = ${entry["field_property_class"]} )
+#set ( $name = ${entry["field_name"]} )
+// $name $class
+			#if ( $class.matches(".+Service>") )
+			// skipping $class
+			#elseif ( $class.matches("<([_A-Za-z0-9]+)>") )
+				${name}.getValue().writeDoc ( stream ) ;
+		#else
+			stream.writeObject( ${entry["field_name"]}.getValue() );
+		#end
+    #end
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	#foreach( $entry in $doc )
+		#propertyGetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $doc )
+		#propertySetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $doc )
+		#propertyValueGetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	#foreach( $entry in $doc )
+		#propertyValueSetter ( $entry["field_name"] $entry["field_property_class"] $entry["field_namet"] )
+	#end
+
+	public boolean getDirty()
+	{
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty)
+	{
+		this.dirty = dirty;
+	}
+
+	public Boolean getDirtyValue()
+	{
+	#foreach( $entry in $doc )
+#set ( $class = ${entry["field_property_class"]} )
+#set ( $name = ${entry["field_name"]} )
+			#if ( $class.matches(".+Service>") )
+			// skipping $class
+		#else  if ( get${entry["field_namet"]}Value().getDirty () == true )
+			dirty = true;
+	#end
+	#end
+		return dirty;
+	}
+
+	public List<Object> getProperties ()
+	{
+		return properties;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder ();
+		result.append("Document [ " );
+	#foreach( $entry in $doc )
+		result.append("${entry["field_name"]} = " + ${entry["field_name"]} + ", ");
+	#end
+		result.append("dirty = " + dirty );
+		result.append(" ]" );
+		return result.toString();
+	}
+
+}

@@ -1,0 +1,110 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+package $packageName;
+
+import java.util.Collection;
+
+import javafx.collections.*;
+import javafx.concurrent.*;
+import javafx.beans.property.*;
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+import java.util.logging.*;
+
+public class ${projectNameTitle}Service extends Service<ObservableList<${projectNameTitle}Data>>
+{
+	private ${projectNameTitle}Document document;
+	private SimpleStringProperty messageProperty = new SimpleStringProperty();
+	private ObservableList<${projectNameTitle}Data> data;
+	private SimpleListProperty<${projectNameTitle}Data> dataProperty;
+	private SimpleListProperty<Object> properties = new SimpleListProperty <Object> ();
+		    private Logger log;
+
+
+	public ${projectNameTitle}Service (${projectNameTitle}Document document)
+	{
+		super();
+		this.document = document;
+		data = FXCollections.observableArrayList();
+		this.dataProperty = new SimpleListProperty<${projectNameTitle}Data>(data);
+       log = ${projectNameTitle}Logger.getInstance(true);
+	}
+
+	@Override
+	public void start()
+	{
+		try
+		{
+			log.info("service start");
+		}
+		catch (Exception e)
+		{
+			this.messageProperty.setValue(e.getMessage());
+		}
+		super.start();
+	}
+
+	@Override
+	public void reset()
+	{
+		super.reset();
+	}
+
+	@Override
+	protected Task<ObservableList<${projectNameTitle}Data>> createTask()
+	{
+			log.info("service create task");
+		return new ${projectNameTitle}Task( document );
+	}
+
+	public ObservableList<${projectNameTitle}Data> getData()
+	{
+		return data;
+	}
+
+	public void setData(ObservableList<${projectNameTitle}Data> data)
+	{
+		this.data = data;
+	}
+
+	public SimpleListProperty<${projectNameTitle}Data> getDataProperty()
+	{
+		return dataProperty;
+	}
+
+	public void setDataProperty(SimpleListProperty<${projectNameTitle}Data> dataProperty)
+	{
+		this.dataProperty = dataProperty;
+	}
+
+	public SimpleStringProperty getMessageProperty()
+	{
+		return messageProperty;
+	}
+
+	public void setMessageProperty(SimpleStringProperty messageProperty)
+	{
+		this.messageProperty = messageProperty;
+	}
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder ();
+		result.append("Service [ " );
+		//result.append(properties);
+		//result.append(document);
+		//result.append(data);
+		result.append(messageProperty);
+		result.append(dataProperty);
+		result.append(" ]" );
+		return result.toString();
+	}
+
+
+}

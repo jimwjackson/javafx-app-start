@@ -1,0 +1,134 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+package $packageName;
+
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+import java.time.*;
+import java.math.*;
+
+import javafx.beans.property.*;
+
+public class ${projectNameTitle}Settings implements Serializable
+{
+	private static final long serialVersionUID = 1L;
+	private boolean dirty;
+	#set ( $settings = $propertiesMap.get("setting") )
+	#foreach( $entry in $settings )	
+    	private Simple$entry["field_property_class"]Property $entry["field_name"];
+    #end
+	
+	public ${projectNameTitle}Settings()
+	{
+	#foreach( $entry in $settings )	
+    	 $entry["field_name"] = new Simple$entry["field_property_class"]Property ();
+    #end
+	#foreach( $entry in $settings )
+		${entry["field_name"]}.addListener ( ( observable, oldValue, newValue ) ->
+		{
+			dirty=true;
+		});
+    #end
+    
+	}
+	
+	public void clear()
+	{
+	#foreach( $entry in $settings )
+		${entry["field_name"]}.setValue(${entry["field_default_value"]});
+   #end
+	}
+	
+	public void readDoc(ObjectInputStream stream)
+	{
+		try
+		{
+	#foreach( $entry in $settings )
+			$entry["field_java_class"] ${entry["field_namet"]}$entry["field_java_class"] = ($entry["field_java_class"]) stream.readObject();
+			this.${entry["field_name"]}.setValue ( ${entry["field_namet"]}$entry["field_java_class"] );
+    #end
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeDoc(ObjectOutputStream stream)
+	{
+		try
+		{
+	#foreach( $entry in $settings )
+			stream.writeObject( ${entry["field_name"]}.getValue() );
+    #end
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+
+	#foreach( $entry in $settings )
+	public Simple$entry["field_property_class"]Property get${entry["field_namet"]} ()
+	{
+		return ${entry["field_name"]};
+	}
+	#end
+
+	#foreach( $entry in $settings )
+	public void set${entry["field_namet"]} ( Simple$entry["field_property_class"]Property ${entry["field_name"]})
+	{
+		this.${entry["field_name"]} = ${entry["field_name"]};
+	}
+	#end
+
+	#foreach( $entry in $settings )
+	public $entry["field_java_class"] get${entry["field_namet"]}Value ()
+	{
+		return ${entry["field_name"]}.getValue();
+	}
+	#end
+
+	#foreach( $entry in $settings )
+	public void set${entry["field_namet"]}Value ( $entry["field_java_class"] ${entry["field_name"]})
+	{
+		this.${entry["field_name"]}.setValue ( ${entry["field_name"]} );
+	}
+	#end
+	
+	public boolean getDirty()
+	{
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty)
+	{
+		this.dirty = dirty;
+	}
+
+	public Boolean getDirtyValue()
+	{
+		return dirty;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder ();
+		result.append("Document [ " );
+	#foreach( $entry in $settings )
+		result.append("${entry["field_name"]} = " + ${entry["field_name"]} + ", ");
+	#end
+		result.append("dirty = " + dirty );
+		result.append(" ]" );
+		return result.toString();
+	}
+	
+}

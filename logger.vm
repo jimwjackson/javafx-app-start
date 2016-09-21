@@ -1,0 +1,49 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+package $packageName;
+
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+  
+
+public class ${projectNameTitle}Logger
+ {
+  private final static Logger log = Logger.getLogger("${projectNameTitle}Logger");
+  private static FileHandler fileHandler;
+  
+  public static Logger getInstance(boolean xmlFormat)
+  {
+    addFileHandler(log, xmlFormat);    
+    return log;
+  }
+  
+private static void addFileHandler(Logger log, boolean xmlFormat)
+ {
+        try
+         {
+            fileHandler = new FileHandler("app.log");
+        }
+         catch (IOException ex)
+          {
+            log.severe(ex.getMessage());
+        }
+		catch (SecurityException ex)
+         {
+            log.severe(ex.getMessage());
+        }
+        if (!(xmlFormat))
+         {
+          // If xmlFormat = true, Log file is in XML format.
+          // If xmlFormat = false, Log file is text only.
+          fileHandler.setFormatter(new SimpleFormatter());
+        }
+        log.addHandler(fileHandler);
+    }
+}

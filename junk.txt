@@ -1,0 +1,5 @@
+   #foreach( $entry in $data )
+    	TableColumn< ${projectNameTitle}Data , $entry["field_java_class"] > 
+    	$entry["field_name"] = 
+    	new TableColumn<${projectNameTitle}Data , $entry["field_java_class"]>("$entry["field_label" ");
+    #end

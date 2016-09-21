@@ -1,0 +1,113 @@
+
+#macro (property $name $class)
+	#if ($class.matches("<([_A-Za-z0-9]+)>"))
+		private SimpleObjectProperty${class} $name;
+	#else
+		private Simple${class}Property $name;
+	#end
+#end
+
+#macro (propertyNew $name $class $jclass)
+
+	#if ($class.matches("<Instant>"))
+		$name = new SimpleObjectProperty${class} (Instant.now ());
+	#elseif ($jclass.matches(".+Service"))
+		$name = new SimpleObjectProperty${class} (new $jclass (this));
+	#elseif ($class.matches("<([_A-Za-z0-9]+)>"))
+		$name = new SimpleObjectProperty${class} (new $jclass ());
+	#else
+		$name = new Simple${class}Property ();
+	#end
+#end
+
+#macro (propertyGetter $name $class $title)
+	#if ($class.matches("<([_A-Za-z0-9]+)>"))
+		public SimpleObjectProperty${class} get${title} ()
+		{
+			return $name;
+		}
+	#else
+		public Simple${class}Property get${title} ()
+		{
+			return $name;
+		}
+	#end
+#end
+
+#macro (propertySetter $name $class $title)
+	#if ($class.matches("<([_A-Za-z0-9]+)>"))
+		public void set${title} ( SimpleObjectProperty${class} $name)
+		{
+			this.${name} = $name;
+		}
+	#else
+		public void set${title} ( Simple${class}Property $name)
+		{
+			this.${name} = $name;
+		}
+	#end
+#end
+
+#macro (propertyValueGetter $name $class $title)
+	#if ($class.matches("<([_A-Za-z0-9]+)>"))
+		#set ( $endIndex = ( $class.length() - 1 ) )
+		// $endIndex
+		public ${class.substring( 1 , $endIndex )} get${title}Value ()
+		{
+			return ${name}.getValue();
+		}
+	#else
+		public ${class} get${title}Value ()
+		{
+			return ${name}.getValue();
+		}
+	#end
+#end
+
+#macro (propertyValueSetter $name $class $title)
+	#if ($class.matches("<([_A-Za-z0-9]+)>"))
+		#set ( $endIndex = ( $class.length() - 1 ) )
+		public void set${title}Value ( ${class.substring( 1 , $endIndex )} $name)
+		{
+			this.${name}.setValue( $name );
+		}
+	#else
+		public void set${title}Value ( ${class} $name)
+		{
+			this.${name}.setValue( $name );
+		}
+	#end
+#end
+
+#macro (properties $map )
+	#foreach( $entry in $map )
+		#property ($entry["field_name"] $entry["field_property_class"])
+    #end
+#end
+
+#macro (propertiesNew $map )
+	#foreach( $entry in $map )
+		#propertyNew ($entry["field_name"] $entry["field_property_class"] $entry["field_java_class"])
+    #end
+#end
+
+#macro (propertiesClear $map )
+	#foreach( $entry in $map )
+		${entry["field_name"]}.setValue(${entry["field_default_value"]});
+   #end
+#end
+
+#macro (propertiesList $map )
+	#foreach( $entry in $map )
+		properties.add ( ${entry["field_name"]} );
+   #end
+#end
+
+#macro ( propertiesFields $map )
+	#foreach( $entry in $map )
+		Label label${entry["field_name"]} = new Label ("${entry["field_label"]}");
+		TextField field${entry["field_name"]} = new TextField ("${entry["field_label"]}");
+		addControls(gridPane,  label${entry["field_name"]} , field${entry["field_name"]} );
+   #end
+#end
+

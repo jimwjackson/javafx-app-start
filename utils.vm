@@ -1,0 +1,34 @@
+// $projectName
+// generated $now
+// using template $template which was last modified $templateLastModified
+// properties $properties
+// current working dir $userdir
+// current user $username
+
+package $packageName;
+
+import org.controlsfx.control.*;
+
+public class ${projectNameTitle}Utils 
+{
+	public void notifyError ( String title, String msg )
+	{
+		Notifications.create().title(title).text(msg).showError();
+	}	
+
+	public void notifyWarning ( String title, String msg )
+	{
+		Notifications.create().title(title).text(msg).showWarning();
+	}	
+
+	public void notifyInfo ( String title, String msg )
+	{
+		Notifications.create().title(title).text(msg).showInformation();
+	}	
+
+	public void notifyConfirm ( String title, String msg )
+	{
+		Notifications.create().title(title).text(msg).showConfirm();
+	}	
+
+}
